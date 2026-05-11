@@ -375,7 +375,7 @@
 <script>
   // BASE: miércoles 7/05/2026 fue la semana 0 → grupo 0 (8,23,20) en Siembra
   const BASE_WEDNESDAY = new Date(2026, 4, 7);
-  const DEBUG_DATE = new Date(2026, 4, 15); // ← BORRAR DESPUÉS DE TESTEAR
+
 
   // Los 9 grupos en orden fijo. El grupo en posición i se sembró en la semana (weekOffset - i).
   // Posición 0 = sembrado esta semana (Siembra), posición 8 = sembrado hace 8 semanas (Cosecha 4/4).
@@ -418,19 +418,36 @@
   }
 
   function getWeekOffset() {
-    const today = typeof DEBUG_DATE !== 'undefined' ? new Date(DEBUG_DATE) : new Date();
+    const today = new Date();
     today.setHours(0,0,0,0);
+    // Días desde el último miércoles: mié=0,jue=1,vie=2,sáb=3,dom=4,lun=5,mar=6
+    // Verificado: lun 11/05 - 5 = jue 6/05... NO. 
+    // 11/05 lunes, último mié = 7/05, diferencia = 4 días. getDay() lunes = 1.
+    // dom(0)=4, lun(1)=4+1=5? No: necesito lun=4.
+    // mié(3)=0, jue(4)=1, vie(5)=2, sáb(6)=3, dom(0)=4, lun(1)=5, mar(2)=6
+    // Pero lunes 11 - 5 = 6/05 que es martes, no miércoles.
+    // Correcto: (getDay() + 4) % 7:  lun(1): (1+4)%7=5. Sigue mal.
+    // La única que funciona: restar hasta llegar a día 3 (miércoles)
+    const d = new Date(today);
+    while (d.getDay() !== 3) {
+      d.setDate(d.getDate() - 1);
+    }
     const base = new Date(BASE_WEDNESDAY);
     base.setHours(0,0,0,0);
-    const diffDays = Math.floor((today - base) / (24 * 60 * 60 * 1000));
-    return Math.floor(diffDays / 7);
+    return Math.round((d - base) / (7 * 24 * 60 * 60 * 1000));
   }
 
   // Dado el weekOffset actual, devuelve qué grupo (índice en GROUPS) está en posición pos
   // pos=0 → sembrado esta semana, pos=8 → cosecha 4/4
+  // En semana 0: GROUPS[0] fue sembrado. En semana 1: GROUPS[8] se siembra (rota hacia atrás).
+  // El grupo sembrado en weekOffset es GROUPS[(9 - weekOffset%9) % 9]
+  // El grupo en posición pos (pos=0 es el más nuevo) es GROUPS[(9 - weekOffset%9 + pos) % 9]... 
+  // Verificado: semana 0, pos 0 → (9-0+0)%9=0 → 8,23,20 ✓
+  //             semana 0, pos 8 → (9-0+8)%9=8 → 10,12,14 ✓  
+  //             semana 1, pos 0 → (9-1+0)%9=8 → 10,12,14 ✓
+  //             semana 1, pos 1 → (9-1+1)%9=0 → 8,23,20 ✓
   function getGroupAtPos(weekOffset, pos) {
-    const seedSlot = ((weekOffset % 9) + 9) % 9;
-    return (seedSlot + pos) % 9;
+    return ((9 - (weekOffset % 9)) + pos) % 9;
   }
 
   function stageLabel(stage) {
