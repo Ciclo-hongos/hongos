@@ -373,35 +373,39 @@
 <footer id="footer"></footer>
 
 <script>
+  // BASE: miércoles 7/05/2026 fue la semana 0 → grupo 0 (8,23,20) en Siembra
   const BASE_WEDNESDAY = new Date(2026, 4, 7);
+  const DEBUG_DATE = new Date(2026, 4, 15); // ← BORRAR DESPUÉS DE TESTEAR
 
-  const CYCLE = [
-    { rooms:[8,23,20],  stageIdx:0, step:0 },
-    { rooms:[13,15,26], stageIdx:1, step:0 },
-    { rooms:[5,27,25],  stageIdx:1, step:1 },
-    { rooms:[7,22,24],  stageIdx:2, step:0 },
-    { rooms:[1,11,18],  stageIdx:3, step:0 },
-    { rooms:[9,16,17],  stageIdx:4, step:0 },
-    { rooms:[2,3,21],   stageIdx:4, step:1 },
-    { rooms:[4,6,19],   stageIdx:4, step:2 },
-    { rooms:[10,12,14], stageIdx:4, step:3 },
+  // Los 9 grupos en orden fijo. El grupo en posición i se sembró en la semana (weekOffset - i).
+  // Posición 0 = sembrado esta semana (Siembra), posición 8 = sembrado hace 8 semanas (Cosecha 4/4).
+  // Este orden es el de la semana 0. Cada semana el ciclo rota: el grupo que estaba en pos 8
+  // vuelve a pos 0 (se siembra de nuevo).
+  // Orden: pos 0 = sembrado esta semana (semana 0 = 7/05/2026), pos 8 = Cosecha 4/4
+  const GROUPS = [
+    [8,23,20],   // pos 0 → Siembra
+    [13,15,26],  // pos 1 → Inoculación 1/2
+    [5,27,25],   // pos 2 → Inoculación 2/2
+    [7,22,24],   // pos 3 → Cobertura
+    [1,11,18],   // pos 4 → Barrido
+    [9,16,17],   // pos 5 → Cosecha 1/4
+    [2,3,21],    // pos 6 → Cosecha 2/4
+    [4,6,19],    // pos 7 → Cosecha 3/4
+    [10,12,14],  // pos 8 → Cosecha 4/4
   ];
 
-  const STAGES = [
-    { name:'Siembra',     cls:'siembra',    totalWeeks:1 },
-    { name:'Inoculación', cls:'inoculacion', totalWeeks:2 },
-    { name:'Cobertura',   cls:'cobertura',  totalWeeks:1 },
-    { name:'Barrido',     cls:'barrido',    totalWeeks:1 },
-    { name:'Cosecha',     cls:'cosecha',    totalWeeks:4 },
+  // Etapas en orden según antigüedad (posición 0 = más nuevo = Siembra)
+  const STAGE_SEQUENCE = [
+    { name:'Siembra',      cls:'siembra',     totalWeeks:1, step:0 },
+    { name:'Inoculación',  cls:'inoculacion',  totalWeeks:2, step:0 },
+    { name:'Inoculación',  cls:'inoculacion',  totalWeeks:2, step:1 },
+    { name:'Cobertura',    cls:'cobertura',   totalWeeks:1, step:0 },
+    { name:'Barrido',      cls:'barrido',     totalWeeks:1, step:0 },
+    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:0 },
+    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:1 },
+    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:2 },
+    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:3 },
   ];
-
-  const BADGE_COLORS = {
-    siembra:    'color:var(--siembra); background:rgba(16,185,129,0.12)',
-    inoculacion:'color:var(--inoc); background:rgba(129,140,248,0.12)',
-    cobertura:  'color:var(--cobert); background:rgba(245,158,11,0.12)',
-    barrido:    'color:var(--barrido); background:rgba(249,115,22,0.12)',
-    cosecha:    'color:var(--cosecha); background:rgba(56,189,248,0.12)',
-  };
 
   function addWeeks(d, n) {
     const r = new Date(d);
@@ -409,110 +413,78 @@
     return r;
   }
 
-  function getMondayOfWeek(d) {
-    const day = d.getDay();
-    const diff = (day === 0) ? -6 : 1 - day;
-    const mon = new Date(d);
-    mon.setDate(d.getDate() + diff);
-    mon.setHours(0,0,0,0);
-    return mon;
-  }
-
   function fmt(d) {
     return d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
   }
 
-  function fmtShort(d) {
-    return d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' });
-  }
-
   function getWeekOffset() {
-    const today = new Date();
+    const today = typeof DEBUG_DATE !== 'undefined' ? new Date(DEBUG_DATE) : new Date();
     today.setHours(0,0,0,0);
     const base = new Date(BASE_WEDNESDAY);
     base.setHours(0,0,0,0);
-    const diffMs = getMondayOfWeek(today) - getMondayOfWeek(base);
-    return Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+    const diffDays = Math.floor((today - base) / (24 * 60 * 60 * 1000));
+    return Math.floor(diffDays / 7);
   }
 
-  function getSlot(weekOffset) {
-    return ((weekOffset % 9) + 9) % 9;
+  // Dado el weekOffset actual, devuelve qué grupo (índice en GROUPS) está en posición pos
+  // pos=0 → sembrado esta semana, pos=8 → cosecha 4/4
+  function getGroupAtPos(weekOffset, pos) {
+    const seedSlot = ((weekOffset % 9) + 9) % 9;
+    return (seedSlot + pos) % 9;
   }
 
-  function getEntry(weekOffset) {
-    return CYCLE[getSlot(weekOffset)];
+  function stageLabel(stage) {
+    if (stage.totalWeeks > 1) return stage.name + ' ' + (stage.step + 1) + '/' + stage.totalWeeks;
+    return stage.name;
   }
 
-  function stageLabel(entry) {
-    const s = STAGES[entry.stageIdx];
-    if (s.totalWeeks > 1) return s.name + ' ' + (entry.step + 1) + '/' + s.totalWeeks;
-    return s.name;
-  }
-
-  function dotsHtml(entry, cls) {
-    const s = STAGES[entry.stageIdx];
-    if (s.totalWeeks <= 1) return '';
+  function dotsHtml(stage) {
+    if (stage.totalWeeks <= 1) return '';
     let html = '<div class="progress-dots">';
-    for (let i = 0; i < s.totalWeeks; i++) {
-      html += `<div class="dot${i <= entry.step ? ' filled' : ''}"></div>`;
+    for (let i = 0; i < stage.totalWeeks; i++) {
+      html += `<div class="dot${i <= stage.step ? ' filled' : ''}"></div>`;
     }
     html += '</div>';
     return html;
   }
 
   function init() {
-    const today = new Date();
+    const today = typeof DEBUG_DATE !== 'undefined' ? new Date(DEBUG_DATE) : new Date();
     const weekOffset = getWeekOffset();
     const wednesdayDate = addWeeks(BASE_WEDNESDAY, weekOffset);
 
     document.getElementById('today-badge').textContent = 'Hoy ' + fmt(today);
     document.getElementById('footer').textContent = 'Actualizado automáticamente · Siembra cada miércoles · 9 grupos · 27 salas';
 
-    const nextSiembraOffset = (() => {
-      for (let i = 0; i <= 9; i++) {
-        if (CYCLE[getSlot(weekOffset + i)].stageIdx === 0) return i;
-      }
-      return null;
-    })();
-
-    const siembraWed = addWeeks(BASE_WEDNESDAY, weekOffset + nextSiembraOffset);
-    const siembraEntry = getEntry(weekOffset + nextSiembraOffset);
+    // Info de siembra actual
+    const seedGroupIdx = getGroupAtPos(weekOffset, 0);
     const siembraInfoEl = document.getElementById('siembra-info');
-    if (nextSiembraOffset === 0) {
-      siembraInfoEl.innerHTML = `Siembra esta semana · miérc. ${fmt(siembraWed)} · salas <strong>${siembraEntry.rooms.join(' · ')}</strong>`;
-    } else {
-      siembraInfoEl.innerHTML = `Próxima siembra en ${nextSiembraOffset} sem · miérc. ${fmt(siembraWed)} · salas <strong>${siembraEntry.rooms.join(' · ')}</strong>`;
-    }
+    siembraInfoEl.innerHTML = `Siembra esta semana · miérc. ${fmt(wednesdayDate)} · salas <strong>${GROUPS[seedGroupIdx].join(' · ')}</strong>`;
 
     const currentSection = document.getElementById('current-section');
     currentSection.innerHTML = `<div class="week-heading current">Esta semana — miérc. ${fmt(wednesdayDate)}</div><div class="cards-grid" id="current-grid"></div>`;
 
     const grid = document.getElementById('current-grid');
-    // Recorremos el CYCLE de atrás para adelante: índice 8 (Cosecha 4/4) → 0 (Siembra)
-    // El weekOffset actual corresponde al índice 0 del CYCLE (Siembra).
-    // El grupo en índice k fue sembrado hace (k) semanas relativas al ciclo.
-    const currentSlot = getSlot(weekOffset);
-    for (let k = 8; k >= 0; k--) {
-      const cycleIdx = (currentSlot + k) % 9;
-      const entry = CYCLE[cycleIdx];
-      const stage = STAGES[entry.stageIdx];
-      // La fecha de siembra de este grupo: weekOffset - (pasos que lleva en el ciclo)
-      // Cada grupo avanzó k posiciones desde la siembra, pero en sentido inverso al array
-      const seedOffset = weekOffset - k;
-      const date = addWeeks(BASE_WEDNESDAY, seedOffset);
+
+    // Mostrar de pos 8 (Cosecha 4/4) a pos 0 (Siembra) → de arriba a abajo
+    for (let pos = 8; pos >= 0; pos--) {
+      const groupIdx = getGroupAtPos(weekOffset, pos);
+      const rooms = GROUPS[groupIdx];
+      const stage = STAGE_SEQUENCE[pos];
+      const seedDate = addWeeks(BASE_WEDNESDAY, weekOffset - pos);
+
       const card = document.createElement('div');
       card.className = 'card ' + stage.cls;
       card.innerHTML = `
         <div class="card-top">
-          <div class="stage-label">${stageLabel(entry)}</div>
+          <div class="stage-label">${stageLabel(stage)}</div>
         </div>
-        <div class="rooms">${entry.rooms.map(r => `<div class="room-num">${r}</div>`).join('')}</div>
-        <div class="card-date">Siembra: ${fmt(date)}</div>
-        ${dotsHtml(entry, stage.cls)}
+        <div class="rooms">${rooms.map(r => `<div class="room-num">${r}</div>`).join('')}</div>
+        <div class="card-date">Siembra: ${fmt(seedDate)}</div>
+        ${dotsHtml(stage)}
       `;
       grid.appendChild(card);
     }
-
   }
 
   init();
