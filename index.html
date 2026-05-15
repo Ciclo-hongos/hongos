@@ -396,15 +396,15 @@
 
   // Etapas en orden según antigüedad (posición 0 = más nuevo = Siembra)
   const STAGE_SEQUENCE = [
-    { name:'Siembra',      cls:'siembra',     totalWeeks:1, step:0 },
-    { name:'Inoculación',  cls:'inoculacion',  totalWeeks:2, step:0 },
-    { name:'Inoculación',  cls:'inoculacion',  totalWeeks:2, step:1 },
-    { name:'Cobertura',    cls:'cobertura',   totalWeeks:1, step:0 },
-    { name:'Barrido',      cls:'barrido',     totalWeeks:1, step:0 },
-    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:0 },
-    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:1 },
-    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:2 },
-    { name:'Cosecha',      cls:'cosecha',     totalWeeks:4, step:3 },
+    { name:'Siembra e Inoculación', cls:'siembra',     totalWeeks:2, step:0 },
+    { name:'Inoculación',           cls:'inoculacion',  totalWeeks:2, step:1 },
+    { name:'Cobertura',             cls:'cobertura',   totalWeeks:1, step:0 },
+    { name:'Barrido',               cls:'barrido',     totalWeeks:1, step:0 },
+    { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:0 },
+    { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:1 },
+    { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:2 },
+    { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:3 },
+    { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:4 },
   ];
 
   function addWeeks(d, n) {
