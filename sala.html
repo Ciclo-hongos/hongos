@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Parámetros de Sala</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --accent: #4ade80;
+      --accent2: #60a5fa;
+      --warn: #fbbf24;
+      --danger: #f87171;
+      --text: #e8eaf0;
+      --text2: #8892a4;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    .top-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .top-bar .sala-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text2);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .top-bar .sala-num {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .status-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 99px;
+      letter-spacing: 0.08em;
+    }
+    .status-badge.activa {
+      background: rgba(74, 222, 128, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+    .status-badge.inactiva {
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .content { padding: 20px; }
+
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #0f1117;
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: 24px;
+      transition: opacity 0.15s;
+    }
+    .cta-btn:active { opacity: 0.8; }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text2);
+      margin-bottom: 12px;
+    }
+
+    .inactive-msg {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 20px;
+      text-align: center;
+    }
+    .inactive-msg .icon { font-size: 36px; margin-bottom: 12px; }
+    .inactive-msg p { color: var(--text2); font-size: 14px; line-height: 1.6; }
+
+    /* Tabla de registros */
+    .registros-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .registro-row {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      gap: 10px;
+    }
+    .registro-row:last-child { border-bottom: none; }
+
+    .registro-fecha {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text2);
+      letter-spacing: 0.05em;
+    }
+
+    .registro-valores {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .valor-chip {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .valor-chip .label {
+      font-size: 9px;
+      font-family: var(--mono);
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .valor-chip .val {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .valor-chip.aire .val { color: var(--accent2); }
+    .valor-chip.sustrato .val { color: var(--warn); }
+    .valor-chip.co2 .val { color: var(--accent); }
+
+    .obs-tag {
+      font-size: 12px;
+      color: var(--text2);
+      font-style: italic;
+      padding: 4px 0 0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text2);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .loading .dot {
+      display: inline-block;
+      animation: blink 1.2s infinite;
+    }
+    .loading .dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
+
+    .error-msg {
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 12px;
+      padding: 20px;
+      color: var(--danger);
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="sala-id">Sala</div>
+    <div class="sala-num" id="sala-num">—</div>
+  </div>
+  <div class="status-badge" id="status-badge"></div>
+</div>
+
+<div class="content">
+  <a class="cta-btn" id="form-link" href="#" target="_blank">
+    ＋ Cargar medición de hoy
+  </a>
+
+  <div class="section-title">Últimos 20 días</div>
+  <div id="registros-container">
+    <div class="loading">Cargando datos<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://script.google.com/macros/s/AKfycbxoNWLMXq7vEtW827suWlSvkDXEDmhuy4b5t-YfPzeFQrLKiO_YfjQ4TE2usIZeGKG7/exec';
+  const FORM_BASE = 'https://docs.google.com/forms/d/e/1FAIpQLSdj-J4Hti-yKeucAcqQXpaDrE6uoju48OcWYvRyI5hPg0MRNw/viewform?usp=pp_url&entry.1409327079=';
+
+  // Leer sala de la URL ?sala=5
+  const params = new URLSearchParams(window.location.search);
+  const sala = params.get('sala') || '1';
+
+  document.getElementById('sala-num').textContent = sala;
+  document.getElementById('form-link').href = FORM_BASE + encodeURIComponent(sala);
+
+  function formatFecha(raw) {
+    const d = new Date(raw);
+    if (isNaN(d)) return raw;
+    return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
+           + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function promSustrato(r) {
+    const vals = [r.bolsa1, r.bolsa2, r.bolsa3].map(Number).filter(v => !isNaN(v));
+    if (!vals.length) return '—';
+    return (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1);
+  }
+
+  fetch(API + '?sala=' + encodeURIComponent(sala))
+    .then(r => r.json())
+    .then(data => {
+      const badge = document.getElementById('status-badge');
+      const container = document.getElementById('registros-container');
+
+      if (data.activa) {
+        badge.textContent = 'ACTIVA';
+        badge.className = 'status-badge activa';
+      } else {
+        badge.textContent = 'INACTIVA';
+        badge.className = 'status-badge inactiva';
+      }
+
+      if (!data.activa || !data.registros.length) {
+        container.innerHTML = `
+          <div class="inactive-msg">
+            <div class="icon">🌿</div>
+            <p>Esta sala no registra mediciones<br>en los últimos 2 días.<br>No está en ciclo activo.</p>
+          </div>`;
+        return;
+      }
+
+      const rows = data.registros.map(r => `
+        <div class="registro-row">
+          <div class="registro-fecha">${formatFecha(r.fecha)}</div>
+          <div class="registro-valores">
+            <div class="valor-chip aire">
+              <span class="label">Aire</span>
+              <span class="val">${r.temp_aire}°</span>
+            </div>
+            <div class="valor-chip sustrato">
+              <span class="label">Sustrato</span>
+              <span class="val">${promSustrato(r)}°</span>
+            </div>
+            <div class="valor-chip co2">
+              <span class="label">CO₂</span>
+              <span class="val">${r.co2}</span>
+            </div>
+          </div>
+          ${r.observaciones ? `<div class="obs-tag">📝 ${r.observaciones}</div>` : ''}
+        </div>
+      `).join('');
+
+      container.innerHTML = `<div class="registros-wrap">${rows}</div>`;
+    })
+    .catch(() => {
+      document.getElementById('registros-container').innerHTML = `
+        <div class="error-msg">No se pudo conectar con la base de datos.<br>Verificá la conexión a internet.</div>`;
+      document.getElementById('status-badge').textContent = 'ERROR';
+      document.getElementById('status-badge').className = 'status-badge inactiva';
+    });
+</script>
+</body>
+</html>
