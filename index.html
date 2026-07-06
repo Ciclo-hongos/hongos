@@ -118,18 +118,9 @@
   .leg-dot { width: 8px; height: 8px; border-radius: 50%; }
 
   main {
-    padding: 1.25rem 1.5rem 3rem;
-    max-width: 720px;
+    padding: 1.25rem 1.5rem 2rem;
+    max-width: 520px;
     margin: 0 auto;
-  }
-
-  /* ── Encabezados de columna ── */
-  .layout-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 16px;
-    align-items: end;
-    margin-bottom: 0;
   }
 
   .week-heading {
@@ -140,29 +131,14 @@
     color: var(--muted);
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 0;
+    margin-bottom: 10px;
   }
   .week-heading.current { color: var(--siembra); }
 
-  .col-special-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-    text-align: center;
-  }
-
-  /* ── Grid principal: 9 filas × 2 columnas ── */
-  .production-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(9, auto);
-    gap: 10px 16px;
-    align-items: stretch;
-    margin-top: 10px;
+  .cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   /* ── Cards ── */
@@ -229,34 +205,10 @@
   .barrido    .room-num { color: var(--barrido); }
   .cosecha    .room-num { color: var(--cosecha); }
 
-  /* Sala especial: nombre grande centrado */
-  .special-name {
-    font-family: 'DM Mono', monospace;
-    font-size: 32px;
-    font-weight: 500;
-    line-height: 1;
-    text-align: center;
-    display: block;
-    margin: 4px 0 6px;
-  }
-  .siembra    .special-name { color: var(--siembra); }
-  .inoculacion .special-name { color: var(--inoc); }
-  .cobertura  .special-name { color: var(--cobert); }
-  .barrido    .special-name { color: var(--barrido); }
-  .cosecha    .special-name { color: var(--cosecha); }
-
   .card-date {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
     color: var(--muted);
-  }
-
-  .companion-info {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    text-align: center;
   }
 
   .progress-dots { display: flex; gap: 4px; margin-top: 8px; }
@@ -267,69 +219,9 @@
   .barrido    .dot.filled { background: var(--barrido); }
   .cosecha    .dot.filled { background: var(--cosecha); }
 
-  /* Barra de 7 semanas */
-  .cycle-bar { display: flex; gap: 3px; margin-top: 10px; }
-  .cycle-pip { flex: 1; height: 3px; border-radius: 2px; background: var(--subtle); }
-  .siembra    .cycle-pip.done { background: var(--siembra); }
-  .inoculacion .cycle-pip.done { background: var(--inoc); }
-  .cobertura  .cycle-pip.done { background: var(--cobert); }
-  .barrido    .cycle-pip.done { background: var(--barrido); }
-  .cosecha    .cycle-pip.done { background: var(--cosecha); }
-
-  .special-mobile-label {
-    display: none;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-    margin-top: 0.5rem;
-    grid-column: 1;
-  }
-  .cycle-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    padding: 2px 5px;
-  }
-
-  @media (max-width: 560px) {
-    .layout-header {
-      grid-template-columns: 1fr;
-    }
-    .col-special-title { display: none; }
-    .production-grid {
-      grid-template-columns: 1fr;
-    }
-    .production-grid > .card {
-      grid-column: 1 !important;
-      grid-row: auto !important;
-    }
-    .special-mobile-label {
-      display: block;
-    }
-
-    /* Próximas siembras en mobile */
-    .upcoming-row {
-      gap: 8px;
-    }
-    .upcoming-date {
-      font-size: 11px;
-      min-width: 90px;
-    }
-    .upcoming-room {
-      font-size: 11px;
-      padding: 2px 6px;
-    }
-  }
-
   /* ── Próximas siembras ── */
   .upcoming-section {
-    max-width: 720px;
+    max-width: 520px;
     margin: 0 auto;
     padding: 0 1.5rem 3rem;
   }
@@ -353,14 +245,13 @@
     border-bottom: 1px solid var(--border);
     flex-wrap: nowrap;
   }
-
   .upcoming-row:last-child { border-bottom: none; }
 
   .upcoming-date {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--muted);
-    min-width: 110px;
+    min-width: 90px;
   }
 
   .upcoming-rooms {
@@ -381,35 +272,16 @@
     padding: 3px 9px;
   }
 
-  .upcoming-room.special {
-    color: var(--siembra);
-    background: var(--siembra-bg);
-    border-color: var(--siembra-bd);
-  }
-
-  .upcoming-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  .upcoming-row-bottom {
-    display: contents; /* en desktop los hijos participan del flex padre normalmente */
-  }
   .upcoming-bolsas {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: var(--muted);
     white-space: nowrap;
-    text-align: right;
-    min-width: 90px;
   }
 
-  .upcoming-count.highlight,
-  .upcoming-bolsas.highlight {
-    color: var(--siembra);
-    font-weight: 500;
+  @media (max-width: 560px) {
+    .upcoming-row { gap: 8px; }
+    .upcoming-date { font-size: 10px; min-width: 75px; }
+    .upcoming-room { font-size: 11px; padding: 2px 6px; }
   }
 
   footer {
@@ -445,11 +317,8 @@
 </div>
 
 <main>
-  <div class="layout-header">
-    <div class="week-heading current" id="week-label"></div>
-    <div class="col-special-title">Ciclo 7s</div>
-  </div>
-  <div class="production-grid" id="production-grid"></div>
+  <div class="week-heading current" id="week-label"></div>
+  <div class="cards-grid" id="current-grid"></div>
 </main>
 
 <div class="upcoming-section">
@@ -460,40 +329,20 @@
 <footer id="footer"></footer>
 
 <script>
-  const BASE_WEDNESDAY = new Date(2026, 4, 6);
+  const BASE_WEDNESDAY = new Date(2026, 4, 6); // miércoles 06/05/2026
 
+  // A y C en sus grupos fijos, ciclo 9 semanas como todos
   const GROUPS = [
-    [8,23,20],
-    [13,15,26],
-    [5,22,25],
-    [7,24,27],
-    [1,11,18],
-    [9,16,17],
-    [2,3,21],
-    [4,6,19],
-    [10,12,14],
+    [8,23,20],      // pos 0
+    [13,15,26],     // pos 1
+    [5,22,25],      // pos 2
+    [7,24,27],      // pos 3
+    [1,11,18,'A'],  // pos 4
+    [9,16,17,'C'],  // pos 5
+    [2,3,21],       // pos 6
+    [4,6,19],       // pos 7
+    [10,12,14],     // pos 8
   ];
-
-  // seedWeek: semanas desde BASE_WEDNESDAY
-  // Sala A: sembrada con [1,11,18] → en semana 5 (10/06/2026)
-  // Sala C: sembrada con [9,16,17] → en semana 4 (03/06/2026), próxima con [4,6,19] semana 11 (21/07/2026)
-  const SPECIAL_SALAS = [
-    {
-      name: 'A',
-      cycles: [
-        { seedWeek: 5, companions: [1,11,18] },
-      ]
-    },
-    {
-      name: 'C',
-      cycles: [
-        { seedWeek: 4,  companions: [9,16,17] },
-        { seedWeek: 11, companions: [4,6,19]  },
-      ]
-    },
-  ];
-
-  const SPECIAL_CYCLE_LENGTH = 7;
 
   const STAGE_SEQUENCE = [
     { name:'Siembra e Inoculación', cls:'siembra',     totalWeeks:2, step:0 },
@@ -505,17 +354,6 @@
     { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:2 },
     { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:3 },
     { name:'Cosecha',               cls:'cosecha',     totalWeeks:5, step:4 },
-  ];
-
-  // Ciclo 7s: igual pero cosecha solo 3 semanas
-  const SPECIAL_STAGE_SEQUENCE = [
-    { name:'Siembra e Inoculación', cls:'siembra',     totalWeeks:2, step:0 },
-    { name:'Inoculación',           cls:'inoculacion', totalWeeks:2, step:1 },
-    { name:'Cobertura',             cls:'cobertura',   totalWeeks:1, step:0 },
-    { name:'Barrido',               cls:'barrido',     totalWeeks:1, step:0 },
-    { name:'Cosecha',               cls:'cosecha',     totalWeeks:3, step:0 },
-    { name:'Cosecha',               cls:'cosecha',     totalWeeks:3, step:1 },
-    { name:'Cosecha',               cls:'cosecha',     totalWeeks:3, step:2 },
   ];
 
   function addWeeks(d, n) {
@@ -551,13 +389,34 @@
     return html + '</div>';
   }
 
-  function getActiveCycle(sala, weekOffset) {
-    for (const cycle of sala.cycles) {
-      const weeksIn = weekOffset - cycle.seedWeek;
-      if (weeksIn >= 0 && weeksIn < SPECIAL_CYCLE_LENGTH) return { cycle, weeksIn };
-    }
-    return null;
+  function getBolsas(sala) {
+    if (sala === 'A' || sala === 'B' || sala === 'C') return 250;
+    const n = Number(sala);
+    if (n >= 1  && n <= 4)  return 744;
+    if (n >= 5  && n <= 6)  return 864;
+    if (n >= 7  && n <= 12) return 640;
+    if (n >= 13 && n <= 27) return 920;
+    return 0;
   }
+
+  function lerpColor(t, stops) {
+    const n = stops.length - 1;
+    const i = Math.min(Math.floor(t * n), n - 1);
+    const lt = t * n - i;
+    const [r1,g1,b1] = stops[i];
+    const [r2,g2,b2] = stops[i+1];
+    return [
+      Math.round(r1 + (r2-r1)*lt),
+      Math.round(g1 + (g2-g1)*lt),
+      Math.round(b1 + (b2-b1)*lt),
+    ];
+  }
+
+  const COLOR_SCALE = [
+    [107, 114, 128],
+    [245, 158,  11],
+    [ 16, 185, 129],
+  ];
 
   function init() {
     const today = new Date();
@@ -565,28 +424,23 @@
     const wednesdayDate = addWeeks(BASE_WEDNESDAY, weekOffset);
 
     document.getElementById('today-badge').textContent = 'Hoy ' + fmt(today);
-    document.getElementById('footer').textContent = 'Actualizado automáticamente · Siembra cada miércoles · 9 grupos (ciclo 9s) + 2 salas (ciclo 7s)';
-    document.getElementById('week-label').textContent = 'Esta semana — miérc. ' + fmt(wednesdayDate);
+    document.getElementById('footer').textContent = 'Actualizado automáticamente · Siembra cada miércoles · 9 grupos';
+    document.getElementById('week-label').textContent = 'Esta semana — ' + fmt(wednesdayDate);
 
     const seedGroupIdx = getGroupAtPos(weekOffset, 0);
     document.getElementById('siembra-info').innerHTML =
-      `Siembra esta semana · miérc. ${fmt(wednesdayDate)} · salas <strong>${GROUPS[seedGroupIdx].join(' · ')}</strong>`;
+      `Siembra esta semana · ${fmt(wednesdayDate)} · salas <strong>${GROUPS[seedGroupIdx].join(' · ')}</strong>`;
 
-    const grid = document.getElementById('production-grid');
-
-    // ── Cards regulares (col 1, filas 1–9) ──
-    // Fila 1 = pos 8 (Cosecha 4/5), fila 9 = pos 0 (Siembra)
+    // ── Cards de estado actual ──
+    const grid = document.getElementById('current-grid');
     for (let pos = 8; pos >= 0; pos--) {
       const groupIdx = getGroupAtPos(weekOffset, pos);
       const rooms = GROUPS[groupIdx];
       const stage = STAGE_SEQUENCE[pos];
       const seedDate = addWeeks(BASE_WEDNESDAY, weekOffset - pos);
-      const gridRow = 9 - pos; // pos 8 → fila 1, pos 0 → fila 9
 
       const card = document.createElement('div');
       card.className = 'card ' + stage.cls;
-      card.style.gridColumn = '1';
-      card.style.gridRow = String(gridRow);
       card.innerHTML = `
         <div class="card-top">
           <div class="stage-label">${stageLabel(stage)}</div>
@@ -598,133 +452,34 @@
       grid.appendChild(card);
     }
 
-    // Label visible solo en mobile, antes de las cards especiales
-    const mobileLabel = document.createElement('div');
-    mobileLabel.className = 'special-mobile-label';
-    mobileLabel.textContent = 'Ciclo corto · 7 semanas';
-    grid.appendChild(mobileLabel);
-
-    // ── Salas de ciclo corto (col 2, fila según su fase actual) ──
-    // weeksIn=X mapea a la misma posición que el grupo regular pos=X → fila = 9 - X
-    for (const sala of SPECIAL_SALAS) {
-      const active = getActiveCycle(sala, weekOffset);
-      const card = document.createElement('div');
-      card.style.gridColumn = '2';
-
-      if (!active) {
-        const nextCycle = sala.cycles.find(c => c.seedWeek > weekOffset);
-        const nextDate = nextCycle ? fmt(addWeeks(BASE_WEDNESDAY, nextCycle.seedWeek)) : '—';
-        // Sin ciclo activo: mostrar al final (fila 9)
-        card.style.gridRow = '9';
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="card-top" style="justify-content:center">
-            <div class="stage-label" style="background:rgba(107,114,128,0.15);color:var(--muted)">Sin ciclo</div>
-          </div>
-          <span class="special-name" style="color:var(--muted)">${sala.name}</span>
-          <div class="card-date" style="text-align:center">Próx: ${nextDate}</div>
-        `;
-      } else {
-        const { cycle, weeksIn } = active;
-        const stage = SPECIAL_STAGE_SEQUENCE[weeksIn];
-        const seedDate = addWeeks(BASE_WEDNESDAY, cycle.seedWeek);
-        const gridRow = 9 - weeksIn; // alinea con la misma fase del grupo regular
-
-        card.style.gridRow = String(gridRow);
-        card.className = 'card ' + stage.cls;
-
-        let pipsHtml = '<div class="cycle-bar">';
-        for (let i = 0; i < SPECIAL_CYCLE_LENGTH; i++)
-          pipsHtml += `<div class="cycle-pip${i <= weeksIn ? ' done' : ''}"></div>`;
-        pipsHtml += '</div>';
-
-        card.innerHTML = `
-          <div class="card-top" style="justify-content:space-between">
-            <div class="stage-label">${stageLabel(stage)}</div>
-            <div class="cycle-tag">7s</div>
-          </div>
-          <span class="special-name">${sala.name}</span>
-          <div class="card-date" style="text-align:center">Siembra: ${fmt(seedDate)}</div>
-          ${pipsHtml}
-        `;
-      }
-
-      grid.appendChild(card);
-    }
     // ── Próximas siembras ──
     const upcomingList = document.getElementById('upcoming-list');
     const WEEKS_AHEAD = 8;
 
-    function getBolsas(sala) {
-      if (sala === 'A' || sala === 'B' || sala === 'C') return 250;
-      const n = Number(sala);
-      if (n >= 1  && n <= 4)  return 744;
-      if (n >= 5  && n <= 6)  return 864;
-      if (n >= 7  && n <= 12) return 640;
-      if (n >= 13 && n <= 27) return 920;
-      return 0;
-    }
-
-    // Interpolación entre stops de color [r,g,b]
-    function lerpColor(t, stops) {
-      const n = stops.length - 1;
-      const i = Math.min(Math.floor(t * n), n - 1);
-      const lt = t * n - i;
-      const [r1,g1,b1] = stops[i];
-      const [r2,g2,b2] = stops[i+1];
-      return [
-        Math.round(r1 + (r2-r1)*lt),
-        Math.round(g1 + (g2-g1)*lt),
-        Math.round(b1 + (b2-b1)*lt),
-      ];
-    }
-
-    // Escala: gris → ámbar → verde
-    const COLOR_SCALE = [
-      [107, 114, 128],  // gris muted
-      [245, 158,  11],  // ámbar
-      [ 16, 185, 129],  // verde siembra
-    ];
-
-    // Pre-calcular todas las semanas para conocer min/max
     const weekData = [];
     for (let w = weekOffset + 1; w <= weekOffset + WEEKS_AHEAD; w++) {
-      const regularGroupIdx = getGroupAtPos(w, 0);
-      const regularRooms = GROUPS[regularGroupIdx];
-      const specialThisWeek = SPECIAL_SALAS.filter(sala => {
-        const firstSeed = sala.cycles[0].seedWeek;
-        return (w - firstSeed) >= 0 && (w - firstSeed) % SPECIAL_CYCLE_LENGTH === 0;
-      });
-      const totalBolsas =
-        regularRooms.reduce((sum, r) => sum + getBolsas(r), 0) +
-        specialThisWeek.reduce((sum, s) => sum + getBolsas(s.name), 0);
-      weekData.push({ w, regularRooms, specialThisWeek, totalBolsas });
+      const groupIdx = getGroupAtPos(w, 0);
+      const rooms = GROUPS[groupIdx];
+      const totalBolsas = rooms.reduce((sum, r) => sum + getBolsas(r), 0);
+      weekData.push({ w, rooms, totalBolsas });
     }
 
     const minBolsas = Math.min(...weekData.map(d => d.totalBolsas));
     const maxBolsas = Math.max(...weekData.map(d => d.totalBolsas));
 
-    for (const { w, regularRooms, specialThisWeek, totalBolsas } of weekData) {
+    for (const { w, rooms, totalBolsas } of weekData) {
       const weekDate = addWeeks(BASE_WEDNESDAY, w);
-      const hasSpecial = specialThisWeek.length > 0;
-      const totalSalas = regularRooms.length + specialThisWeek.length;
-
       const t = maxBolsas === minBolsas ? 1 : (totalBolsas - minBolsas) / (maxBolsas - minBolsas);
       const [r,g,b] = lerpColor(t, COLOR_SCALE);
-      const textColor  = `rgb(${r},${g},${b})`;
-      const bgColor    = `rgba(${r},${g},${b},0.12)`;
-      const bordColor  = `rgba(${r},${g},${b},0.35)`;
-
-      const roomsHtml = [
-        ...regularRooms.map(room => `<span class="upcoming-room">${room}</span>`),
-        ...specialThisWeek.map(s => `<span class="upcoming-room special">${s.name}</span>`),
-      ].join('');
+      const textColor = `rgb(${r},${g},${b})`;
+      const bgColor   = `rgba(${r},${g},${b},0.12)`;
+      const bordColor = `rgba(${r},${g},${b},0.35)`;
 
       const row = document.createElement('div');
       row.className = 'upcoming-row';
       row.innerHTML = `
         <div class="upcoming-date">${fmt(weekDate)}</div>
-        <div class="upcoming-rooms">${roomsHtml}</div>
+        <div class="upcoming-rooms">${rooms.map(r => `<span class="upcoming-room">${r}</span>`).join('')}</div>
         <div class="upcoming-bolsas"
              style="color:${textColor};background:${bgColor};border:1px solid ${bordColor};border-radius:5px;padding:3px 9px;">
           ${totalBolsas.toLocaleString('es-AR')} bolsas
