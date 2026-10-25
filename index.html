@@ -205,6 +205,14 @@
   .barrido    .room-num { color: var(--barrido); }
   .cosecha    .room-num { color: var(--cosecha); }
 
+  .room-num.room-container {
+    font-size: 16px;
+    opacity: 0.65;
+    border-left: 1px dashed currentColor;
+    padding-left: 8px;
+    margin-left: 4px;
+  }
+
   .card-date {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -446,12 +454,20 @@
     const grid = document.getElementById('current-grid');
     for (let pos = 8; pos >= 0; pos--) {
       const groupIdx = getGroupAtPos(weekOffset, pos);
-      // En pos 0 (Siembra) y pos 1 (Inoculación), las container salas no están en sala — están en el container
+      // En pos 0 y 1, las container salas están en el container externo (no en sala)
       const allRooms = GROUPS[groupIdx];
       const rooms = (pos === 0 || pos === 1)
         ? allRooms.filter(r => !CONTAINER_SALAS.includes(String(r)))
         : allRooms;
-      // Si quedó vacío por ser un grupo que solo tiene container salas, igual mostrar card (caso raro)
+
+      // En pos 2 (Cobertura), agregamos las container salas cuyo grupo está en pos 0
+      // ya que ingresan a la sala en esa etapa (vienen del container)
+      let containerIncoming = [];
+      if (pos === 2) {
+        const pos0GroupIdx = getGroupAtPos(weekOffset, 0);
+        containerIncoming = GROUPS[pos0GroupIdx].filter(r => CONTAINER_SALAS.includes(String(r)));
+      }
+
       const stage = STAGE_SEQUENCE[pos];
       const seedDate = addWeeks(BASE_WEDNESDAY, weekOffset - pos);
 
@@ -461,7 +477,10 @@
         <div class="card-top">
           <div class="stage-label">${stageLabel(stage)}</div>
         </div>
-        <div class="rooms">${rooms.map(r => `<div class="room-num">${r}</div>`).join('')}</div>
+        <div class="rooms">
+          ${rooms.map(r => `<div class="room-num">${r}</div>`).join('')}
+          ${containerIncoming.map(r => `<div class="room-num room-container" title="Viene del container">⬡ ${r}</div>`).join('')}
+        </div>
         <div class="card-date">Siembra: ${fmt(seedDate)}</div>
         ${dotsHtml(stage)}
       `;
