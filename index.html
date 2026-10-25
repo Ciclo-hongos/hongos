@@ -272,6 +272,11 @@
     padding: 3px 9px;
   }
 
+  .upcoming-room.container-sala {
+    border-style: dashed;
+    opacity: 0.8;
+  }
+
   .upcoming-bolsas {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -331,7 +336,9 @@
 <script>
   const BASE_WEDNESDAY = new Date(2026, 4, 6); // miércoles 06/05/2026
 
-  // A y C en sus grupos fijos, ciclo 9 semanas como todos
+  // Salas incubadas en container: se insertan directo en Cobertura (pos 2), saltando Siembra e Inoculación
+  const CONTAINER_SALAS = ['A', 'B', 'C'];
+
   const GROUPS = [
     [8,20,26,'A'],     // pos 0
     [5,13,15],         // pos 1
@@ -428,14 +435,21 @@
     document.getElementById('week-label').textContent = 'Esta semana — ' + fmt(wednesdayDate);
 
     const seedGroupIdx = getGroupAtPos(weekOffset, 0);
+    // En la siembra de esta semana no mostramos las container salas (están en el container, no en la sala)
+    const seedRooms = GROUPS[seedGroupIdx].filter(r => !CONTAINER_SALAS.includes(String(r)));
     document.getElementById('siembra-info').innerHTML =
-      `Siembra esta semana · ${fmt(wednesdayDate)} · salas <strong>${GROUPS[seedGroupIdx].join(' · ')}</strong>`;
+      `Siembra esta semana · ${fmt(wednesdayDate)} · salas <strong>${seedRooms.join(' · ')}</strong>`;
 
     // ── Cards de estado actual ──
     const grid = document.getElementById('current-grid');
     for (let pos = 8; pos >= 0; pos--) {
       const groupIdx = getGroupAtPos(weekOffset, pos);
-      const rooms = GROUPS[groupIdx];
+      // En pos 0 (Siembra) y pos 1 (Inoculación), las container salas no están en sala — están en el container
+      const allRooms = GROUPS[groupIdx];
+      const rooms = (pos === 0 || pos === 1)
+        ? allRooms.filter(r => !CONTAINER_SALAS.includes(String(r)))
+        : allRooms;
+      // Si quedó vacío por ser un grupo que solo tiene container salas, igual mostrar card (caso raro)
       const stage = STAGE_SEQUENCE[pos];
       const seedDate = addWeeks(BASE_WEDNESDAY, weekOffset - pos);
 
@@ -456,12 +470,28 @@
     const upcomingList = document.getElementById('upcoming-list');
     const WEEKS_AHEAD = 8;
 
+    // Para próximas siembras: las container salas se insertan 2 semanas después (en Cobertura)
+    // Primero calculamos las bolsas "extra" que llegan de container por semana
+    const containerBolsasExtra = {};
+    for (let w = weekOffset + 1; w <= weekOffset + WEEKS_AHEAD + 2; w++) {
+      const groupIdx = getGroupAtPos(w, 0);
+      const containerInGroup = GROUPS[groupIdx].filter(r => CONTAINER_SALAS.includes(String(r)));
+      if (containerInGroup.length > 0) {
+        const wCobertura = w + 2; // llegan 2 semanas después
+        containerBolsasExtra[wCobertura] = (containerBolsasExtra[wCobertura] || 0)
+          + containerInGroup.reduce((sum, r) => sum + getBolsas(r), 0);
+      }
+    }
+
     const weekData = [];
     for (let w = weekOffset + 1; w <= weekOffset + WEEKS_AHEAD; w++) {
       const groupIdx = getGroupAtPos(w, 0);
-      const rooms = GROUPS[groupIdx];
-      const totalBolsas = rooms.reduce((sum, r) => sum + getBolsas(r), 0);
-      weekData.push({ w, rooms, totalBolsas });
+      // Salas regulares (sin las container, que van al container)
+      const rooms = GROUPS[groupIdx].filter(r => !CONTAINER_SALAS.includes(String(r)));
+      // Bolsas regulares + bolsas container que llegan esta semana desde siembras anteriores
+      const regularBolsas = rooms.reduce((sum, r) => sum + getBolsas(r), 0);
+      const totalBolsas = regularBolsas + (containerBolsasExtra[w] || 0);
+      weekData.push({ w, rooms, totalBolsas, containerExtra: containerBolsasExtra[w] || 0 });
     }
 
     const minBolsas = Math.min(...weekData.map(d => d.totalBolsas));
@@ -477,9 +507,18 @@
 
       const row = document.createElement('div');
       row.className = 'upcoming-row';
+      // También mostrar las container salas que llegan esta semana (vienen de siembra 2 sem atrás)
+      const containerArriving = CONTAINER_SALAS.filter(cs => {
+        const groupAtSiembra = getGroupAtPos(w - 2, 0);
+        return GROUPS[groupAtSiembra].map(String).includes(cs);
+      });
+
       row.innerHTML = `
         <div class="upcoming-date">${fmt(weekDate)}</div>
-        <div class="upcoming-rooms">${rooms.map(r => `<span class="upcoming-room">${r}</span>`).join('')}</div>
+        <div class="upcoming-rooms">${[
+          ...rooms.map(r => `<span class="upcoming-room">${r}</span>`),
+          ...containerArriving.map(r => `<span class="upcoming-room container-sala" title="Cobertura (viene de container)">${r}</span>`)
+        ].join('')}</div>
         <div class="upcoming-bolsas"
              style="color:${textColor};background:${bgColor};border:1px solid ${bordColor};border-radius:5px;padding:3px 9px;">
           ${totalBolsas.toLocaleString('es-AR')} bolsas
