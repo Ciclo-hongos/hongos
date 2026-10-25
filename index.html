@@ -272,9 +272,11 @@
     padding: 3px 9px;
   }
 
-  .upcoming-room.container-sala {
+  .upcoming-room.container-badge {
     border-style: dashed;
-    opacity: 0.8;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 0.02em;
   }
 
   .upcoming-bolsas {
@@ -470,34 +472,36 @@
     const upcomingList = document.getElementById('upcoming-list');
     const WEEKS_AHEAD = 8;
 
-    // Para próximas siembras: las container salas se insertan 2 semanas después (en Cobertura)
-    // Primero calculamos las bolsas "extra" que llegan de container por semana
-    const containerBolsasExtra = {};
-    for (let w = weekOffset + 1; w <= weekOffset + WEEKS_AHEAD + 2; w++) {
-      const groupIdx = getGroupAtPos(w, 0);
-      const containerInGroup = GROUPS[groupIdx].filter(r => CONTAINER_SALAS.includes(String(r)));
-      if (containerInGroup.length > 0) {
-        const wCobertura = w + 2; // llegan 2 semanas después
-        containerBolsasExtra[wCobertura] = (containerBolsasExtra[wCobertura] || 0)
-          + containerInGroup.reduce((sum, r) => sum + getBolsas(r), 0);
+    // Las salas A/B/C se incuban en un container externo (ciclo de 2 semanas).
+    // El container se llena cada 2 semanas: se busca la semana más reciente donde
+    // algún grupo de A/B/C estaba en pos 0, y a partir de ahí +2 semanas el primer relleno,
+    // luego cada 2 semanas siguientes.
+    let lastContainerStartWeek = weekOffset;
+    for (let w = weekOffset; w >= weekOffset - 9; w--) {
+      const gIdx = getGroupAtPos(w, 0);
+      if (GROUPS[gIdx].some(r => CONTAINER_SALAS.includes(String(r)))) {
+        lastContainerStartWeek = w;
+        break;
       }
     }
+    const containerRefillBase = lastContainerStartWeek + 2;
 
     const weekData = [];
     for (let w = weekOffset + 1; w <= weekOffset + WEEKS_AHEAD; w++) {
       const groupIdx = getGroupAtPos(w, 0);
-      // Salas regulares (sin las container, que van al container)
+      // A/B/C no hacen siembra regular — van al container
       const rooms = GROUPS[groupIdx].filter(r => !CONTAINER_SALAS.includes(String(r)));
-      // Bolsas regulares + bolsas container que llegan esta semana desde siembras anteriores
+      // Semanas de relleno de container: cada 2 semanas a partir de containerRefillBase
+      const isContainerWeek = w >= containerRefillBase && (w - containerRefillBase) % 2 === 0;
       const regularBolsas = rooms.reduce((sum, r) => sum + getBolsas(r), 0);
-      const totalBolsas = regularBolsas + (containerBolsasExtra[w] || 0);
-      weekData.push({ w, rooms, totalBolsas, containerExtra: containerBolsasExtra[w] || 0 });
+      const totalBolsas = regularBolsas + (isContainerWeek ? 250 : 0);
+      weekData.push({ w, rooms, totalBolsas, isContainerWeek });
     }
 
     const minBolsas = Math.min(...weekData.map(d => d.totalBolsas));
     const maxBolsas = Math.max(...weekData.map(d => d.totalBolsas));
 
-    for (const { w, rooms, totalBolsas } of weekData) {
+    for (const { w, rooms, totalBolsas, isContainerWeek } of weekData) {
       const weekDate = addWeeks(BASE_WEDNESDAY, w);
       const t = maxBolsas === minBolsas ? 1 : (totalBolsas - minBolsas) / (maxBolsas - minBolsas);
       const [r,g,b] = lerpColor(t, COLOR_SCALE);
@@ -507,18 +511,13 @@
 
       const row = document.createElement('div');
       row.className = 'upcoming-row';
-      // También mostrar las container salas que llegan esta semana (vienen de siembra 2 sem atrás)
-      const containerArriving = CONTAINER_SALAS.filter(cs => {
-        const groupAtSiembra = getGroupAtPos(w - 2, 0);
-        return GROUPS[groupAtSiembra].map(String).includes(cs);
-      });
 
       row.innerHTML = `
         <div class="upcoming-date">${fmt(weekDate)}</div>
-        <div class="upcoming-rooms">${[
-          ...rooms.map(r => `<span class="upcoming-room">${r}</span>`),
-          ...containerArriving.map(r => `<span class="upcoming-room container-sala" title="Cobertura (viene de container)">${r}</span>`)
-        ].join('')}</div>
+        <div class="upcoming-rooms">
+          ${rooms.map(r => `<span class="upcoming-room">${r}</span>`).join('')}
+          ${isContainerWeek ? `<span class="upcoming-room container-badge" title="250 bolsas para container (A/B/C)">⬡ container</span>` : ''}
+        </div>
         <div class="upcoming-bolsas"
              style="color:${textColor};background:${bgColor};border:1px solid ${bordColor};border-radius:5px;padding:3px 9px;">
           ${totalBolsas.toLocaleString('es-AR')} bolsas
